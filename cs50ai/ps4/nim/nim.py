@@ -101,7 +101,10 @@ class NimAI():
         Return the Q-value for the state `state` and the action `action`.
         If no Q-value exists yet in `self.q`, return 0.
         """
-        raise NotImplementedError
+        if (tuple(state), action) in self.q:
+            return self.q[(tuple(state), action)]
+        else:
+            return 0
 
     def update_q_value(self, state, action, old_q, reward, future_rewards):
         """
@@ -118,7 +121,9 @@ class NimAI():
         `alpha` is the learning rate, and `new value estimate`
         is the sum of the current reward and estimated future rewards.
         """
-        raise NotImplementedError
+        self.q[(tuple(state),action)] = old_q + self.alpha * ( reward + (future_rewards) - old_q)
+
+        
 
     def best_future_reward(self, state):
         """
@@ -130,7 +135,19 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-        raise NotImplementedError
+        max_reward = 0
+        action_list = Nim.available_actions(state)
+        if len(action_list) == 0:
+            return 0
+        for action in action_list:
+            if (tuple(state),action) not in self.q:
+                q_val = 0
+            else:
+                q_val = self.q[(tuple(state),action)]
+            if q_val > max_reward:
+                max_reward = q_val
+        return max_reward
+        
 
     def choose_action(self, state, epsilon=True):
         """
@@ -147,7 +164,22 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        raise NotImplementedError
+        action_list = Nim.available_actions(state)
+
+        # check if we should go into randomness
+        best_action = random.choice(list(action_list))
+        if epsilon:
+            if random.random() <= self.epsilon:
+                return best_action
+        #print(best_action)
+        best_reward = 0
+        for action in action_list:
+            #print(action)
+            if (tuple(state),action) in self.q and self.q[(tuple(state),action)] >= best_reward:
+                best_action = action
+                best_reward = self.q[(tuple(state),action)]
+        #print(best_action)
+        return best_action
 
 
 def train(n):

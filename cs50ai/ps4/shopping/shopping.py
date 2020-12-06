@@ -7,6 +7,10 @@ from sklearn.neighbors import KNeighborsClassifier
 
 TEST_SIZE = 0.4
 
+Month_map = {'Jan':0, 'Feb':1, 'Mar':2, 'Apr':3, 'May':4, 'Jun':5, 'Jul':6, 'Aug':7, 'Sep':8, 'Oct':9, 'Nov':10, 'Dec':11}
+VisitorType_map = {'Returning_Visitor':1, 'New_Visitor':0, 'Other':0}
+Weekend_map = {True:1, False:0}
+
 
 def main():
 
@@ -66,9 +70,7 @@ def load_data(filename):
            'BounceRates', 'ExitRates', 'PageValues', 'SpecialDay', 'Month',
            'OperatingSystems', 'Browser', 'Region', 'TrafficType', 'VisitorType',
            'Weekend']]
-    Month_map = {'Jan':0, 'Feb':1, 'Mar':2, 'Apr':3, 'May':4, 'Jun':5, 'Jul':6, 'Aug':7, 'Sep':8, 'Oct':9, 'Nov':10, 'Dec':11}
-    VisitorType_map = {'Returning_Visitor':1, 'New_Visitor':0, 'Other':0}
-    Weekend_map = {True:1, False:0}
+
     evidence['Month'] = evidence['Month'].map(Month_map)
     evidence.loc[evidence['Month'].isnull(),'Month'] = 12
     evidence['VisitorType'] = evidence['VisitorType'].map(VisitorType_map)
@@ -111,21 +113,19 @@ def evaluate(labels, predictions):
     """
     sensitivity_list = []
     specificity_list = []
-    max_row = min(len(labels),len(predictions))
-    i = 0
-    while i < max_row:
-        if labels[i] == 1:
-            if labels[i] == predictions[i]:
+
+    for i, label in enumerate(labels):
+        if label == 1:
+            if label == predictions[i]:
                 sensitivity_list.append(1)
             else:
-                sensitivity_list.append(0)
-
-        if labels[i] == 0:
-            if labels[i] == predictions[i]:
+                sensitivity_list.append(0)  
+        if label == 0:
+            if label == predictions[i]:
                 specificity_list.append(1)
             else:
-                specificity_list.append(0)                
-        i = i +1
+                specificity_list.append(0)                        
+
 
     if len(sensitivity_list) == 0:
         sensitivity = 1
